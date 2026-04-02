@@ -24,6 +24,18 @@ export default function Home() {
       .then((d) => {
         setData(d);
         setLastUpdated(new Date().toLocaleString("zh-TW"));
+
+        // Auto-select all lines that have actual data
+        const keys: string[] = [];
+        d.platformNames.forEach((name) => {
+          const total = d.days.reduce((s, day) => s + (day.platforms[name] ?? 0), 0);
+          if (total > 0) keys.push(`p_${name}`);
+        });
+        d.brandNames.forEach((name) => {
+          const total = d.days.reduce((s, day) => s + (day.brands[name] ?? 0), 0);
+          if (total > 0) keys.push(`b_${name}`);
+        });
+        setSelectedLines(keys);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

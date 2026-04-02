@@ -48,7 +48,7 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
 
   const activeLines = selectedLines.length > 0
     ? allLines.filter((l) => selectedLines.includes(l.key))
-    : allLines.filter((l) => !l.dashed); // default: only platforms
+    : allLines; // show all if nothing selected
 
   const datasets = activeLines.map((line) => ({
     label: line.label,
