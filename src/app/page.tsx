@@ -6,7 +6,6 @@ import ChartSetup from "@/components/ChartSetup";
 import KPICards from "@/components/KPICards";
 import TrendChart from "@/components/TrendChart";
 import PieChart from "@/components/PieChart";
-import BrandCharts from "@/components/BrandCharts";
 import DateFilter from "@/components/DateFilter";
 import DetailTable from "@/components/DetailTable";
 import ShopeeMetrics from "@/components/ShopeeMetrics";
@@ -17,7 +16,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [range, setRange] = useState<"all" | "7d" | "14d" | "30d">("all");
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedLines, setSelectedLines] = useState<string[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   useEffect(() => {
@@ -39,9 +38,9 @@ export default function Home() {
     return { ...data, days, grandTotal: days.reduce((s, d) => s + d.dailyTotal, 0) };
   }, [data, range]);
 
-  const togglePlatform = (name: string) => {
-    setSelectedPlatforms((prev) =>
-      prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]
+  const toggleLine = (key: string) => {
+    setSelectedLines((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
 
@@ -89,18 +88,20 @@ export default function Home() {
       <DateFilter
         range={range}
         onRangeChange={setRange}
-        selectedPlatforms={selectedPlatforms}
+        selectedLines={selectedLines}
         platformNames={filteredData.platformNames}
-        onPlatformToggle={togglePlatform}
+        brandNames={filteredData.brandNames}
+        onLineToggle={toggleLine}
       />
 
-      {/* Charts Row */}
+      {/* Trend Chart + Platform Pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <TrendChart
             days={filteredData.days}
             platformNames={filteredData.platformNames}
-            selectedPlatforms={selectedPlatforms}
+            brandNames={filteredData.brandNames}
+            selectedLines={selectedLines}
           />
         </div>
         <PieChart days={filteredData.days} platformNames={filteredData.platformNames} />
@@ -108,9 +109,6 @@ export default function Home() {
 
       {/* Shopee Metrics */}
       <ShopeeMetrics data={filteredData.shopeeData} />
-
-      {/* mo+ Brand Charts (bar + trend + pie) */}
-      <BrandCharts days={filteredData.days} brandNames={filteredData.brandNames} range={range} />
 
       {/* Issue Category Breakdown */}
       <CategoryBreakdown data={filteredData.categoryData} />
