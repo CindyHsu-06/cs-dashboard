@@ -85,7 +85,7 @@ function parseCSVLine(line: string): string[] {
 const BASE_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTQRwK1X6nwxgRIwUX_utrvFCwnJzGTGpXvgzMNIqjum2fDTDO-3BfcgWD87rgMsg/pub";
 
-const SHEET_CSV_URL = `${BASE_URL}?output=csv`;
+const SHEET_CSV_URL = `${BASE_URL}?gid=966641805&single=true&output=csv`;
 const SHOPEE_CSV_URL = `${BASE_URL}?gid=583268971&single=true&output=csv`;
 const CATEGORY_CSV_URL = `${BASE_URL}?gid=1880927677&single=true&output=csv`;
 
