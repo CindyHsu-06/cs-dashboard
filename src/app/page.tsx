@@ -9,6 +9,8 @@ import PieChart from "@/components/PieChart";
 import BrandBarChart from "@/components/BrandBarChart";
 import DateFilter from "@/components/DateFilter";
 import DetailTable from "@/components/DetailTable";
+import ShopeeMetrics from "@/components/ShopeeMetrics";
+import CategoryBreakdown from "@/components/CategoryBreakdown";
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -104,8 +106,14 @@ export default function Home() {
         <PieChart days={filteredData.days} platformNames={filteredData.platformNames} />
       </div>
 
-      {/* Brand Bar Chart */}
+      {/* mo+ Brand Bar Chart */}
       <BrandBarChart days={filteredData.days} brandNames={filteredData.brandNames} />
+
+      {/* Shopee Metrics */}
+      <ShopeeMetrics data={filteredData.shopeeData} />
+
+      {/* Issue Category Breakdown */}
+      <CategoryBreakdown data={filteredData.categoryData} />
 
       {/* Detail Table */}
       <DetailTable

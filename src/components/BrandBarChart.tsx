@@ -26,7 +26,10 @@ export default function BrandBarChart({ days, brandNames }: Props) {
 
   return (
     <div className="bg-[#1a1d2e] rounded-xl p-4 md:p-6 border border-[#2a2e45]">
-      <h3 className="text-lg font-semibold mb-4 text-white">品牌進線排行</h3>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-white">mo+ 品牌進線排行</h3>
+        <p className="text-xs text-[#8b8fa3] mt-1">以下品牌皆隸屬 MOMO（mo+）平台旗下賣場</p>
+      </div>
       <div className="h-[350px]">
         <Bar
           data={{
