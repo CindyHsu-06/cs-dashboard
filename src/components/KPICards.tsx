@@ -16,7 +16,6 @@ export default function KPICards({ data }: Props) {
     ? ((today.dailyTotal - yesterday.dailyTotal) / yesterday.dailyTotal) * 100
     : 0;
 
-  // Find top platform by total across all days
   const platformTotals: Record<string, number> = {};
   days.forEach((d) => {
     Object.entries(d.platforms).forEach(([name, val]) => {
@@ -26,34 +25,33 @@ export default function KPICards({ data }: Props) {
   const topPlatform = Object.entries(platformTotals).sort((a, b) => b[1] - a[1])[0];
 
   const cards = [
-    { label: "累計進線", value: grandTotal.toLocaleString(), accent: "border-blue-500", valueColor: "text-blue-400" },
-    { label: "今日進線", value: today?.dailyTotal.toLocaleString() ?? "0", accent: "border-emerald-500", valueColor: "text-emerald-400" },
-    { label: "日均進線", value: avgDaily.toFixed(1), accent: "border-purple-500", valueColor: "text-purple-400" },
+    { label: "累計進線", value: grandTotal.toLocaleString(), bar: "bg-sky-400/60" },
+    { label: "今日進線", value: today?.dailyTotal.toLocaleString() ?? "0", bar: "bg-emerald-400/60" },
+    { label: "日均進線", value: avgDaily.toFixed(1), bar: "bg-violet-400/60" },
     {
       label: "較前日增減",
       value: `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(1)}%`,
-      accent: dayChange >= 0 ? "border-red-500" : "border-green-500",
-      valueColor: dayChange >= 0 ? "text-red-400" : "text-green-400",
+      bar: dayChange >= 0 ? "bg-rose-400/60" : "bg-teal-400/60",
     },
     {
       label: "最大來源平台",
       value: topPlatform ? topPlatform[0] : "N/A",
       sub: topPlatform ? `${topPlatform[1]} 筆` : "",
-      accent: "border-amber-500",
-      valueColor: "text-amber-400",
+      bar: "bg-amber-400/60",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
       {cards.map((card) => (
         <div
           key={card.label}
-          className={`bg-[#1a1d2e] rounded-lg p-4 border border-[#2a2e45] border-l-4 ${card.accent}`}
+          className="bg-[#1a1d2e] rounded-lg px-4 py-3 border border-[#2a2e45] relative overflow-hidden"
         >
-          <div className="text-xs text-[#8b8fa3] font-medium mb-2">{card.label}</div>
-          <div className={`text-2xl font-bold ${card.valueColor}`}>{card.value}</div>
-          {card.sub && <div className="text-xs text-[#8b8fa3] mt-1">{card.sub}</div>}
+          <div className="text-xs text-[#8b8fa3] font-medium mb-1">{card.label}</div>
+          <div className="text-xl font-bold text-[#e4e6f0]">{card.value}</div>
+          {card.sub && <div className="text-xs text-[#6b7084] mt-0.5">{card.sub}</div>}
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${card.bar} rounded-b-lg`} />
         </div>
       ))}
     </div>

@@ -14,42 +14,31 @@ function FunnelBar({ label, value, max, color, sub }: {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-sm">
-        <span className="text-[#8b8fa3]">{label}</span>
-        <span className="text-white font-semibold">{value.toLocaleString()}{sub && <span className="text-[#8b8fa3] text-xs ml-1">{sub}</span>}</span>
+        <span className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
+          <span className="text-[#c0c3d1]">{label}</span>
+        </span>
+        <span className="text-[#e4e6f0] font-semibold">{value.toLocaleString()}{sub && <span className="text-[#6b7084] text-xs ml-1">{sub}</span>}</span>
       </div>
-      <div className="h-2.5 bg-[#0f1117] rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(pct, 2)}%`, background: color }} />
+      <div className="h-2 bg-[#0f1117] rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all bg-[#3a3f55]" style={{ width: `${Math.max(pct, 2)}%` }} />
       </div>
     </div>
   );
 }
 
-const METRIC_ACCENTS: Record<string, string> = {
-  "訪客數": "border-orange-500",
-  "聊聊詢問數": "border-blue-500",
-  "聊聊訪客數": "border-cyan-500",
-  "訪客詢問率": "border-purple-500",
-  "回應率": "border-emerald-500",
-  "平均對話時間": "border-amber-500",
-  "買家數": "border-pink-500",
-  "訂單數": "border-indigo-500",
-  "件數": "border-teal-500",
-  "銷售額": "border-red-500",
-  "轉換率": "border-lime-500",
-};
-
-const METRIC_VALUE_COLORS: Record<string, string> = {
-  "訪客數": "text-orange-400",
-  "聊聊詢問數": "text-blue-400",
-  "聊聊訪客數": "text-cyan-400",
-  "訪客詢問率": "text-purple-400",
-  "回應率": "text-emerald-400",
-  "平均對話時間": "text-amber-400",
-  "買家數": "text-pink-400",
-  "訂單數": "text-indigo-400",
-  "件數": "text-teal-400",
-  "銷售額": "text-red-400",
-  "轉換率": "text-lime-400",
+const METRIC_BARS: Record<string, string> = {
+  "訪客數": "bg-amber-400/50",
+  "聊聊詢問數": "bg-sky-400/50",
+  "聊聊訪客數": "bg-cyan-400/50",
+  "訪客詢問率": "bg-violet-400/50",
+  "回應率": "bg-emerald-400/50",
+  "平均對話時間": "bg-amber-300/50",
+  "買家數": "bg-rose-400/50",
+  "訂單數": "bg-indigo-400/50",
+  "件數": "bg-teal-400/50",
+  "銷售額": "bg-red-400/50",
+  "轉換率": "bg-lime-400/50",
 };
 
 export default function ShopeeMetrics({ data }: Props) {
@@ -85,8 +74,8 @@ export default function ShopeeMetrics({ data }: Props) {
     <div className="bg-[#1a1d2e] rounded-xl p-4 md:p-6 border border-[#2a2e45]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">蝦皮聊聊數據</h3>
-          <p className="text-xs text-[#8b8fa3] mt-1">資料來源：蝦皮賣家中心匯出（各賣場加總）</p>
+          <h3 className="text-lg font-semibold text-[#e4e6f0]">蝦皮聊聊數據</h3>
+          <p className="text-xs text-[#6b7084] mt-1">資料來源：蝦皮賣家中心匯出（各賣場加總）</p>
         </div>
         <div className="flex gap-2">
           {allMonths.map((m) => {
@@ -97,7 +86,7 @@ export default function ShopeeMetrics({ data }: Props) {
                 onClick={() => setSelectedMonth(m)}
                 className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
                   selectedMonth === m
-                    ? "bg-orange-600 text-white border-orange-600 shadow-lg shadow-orange-600/30"
+                    ? "bg-[#2a3a5c] text-sky-300 border-sky-400/40"
                     : monthHasData
                     ? "bg-[#0f1117] text-[#8b8fa3] border-[#2a2e45] hover:bg-[#232740]"
                     : "bg-[#0f1117] text-[#3a3e55] border-[#2a2e45] opacity-50"
@@ -112,7 +101,7 @@ export default function ShopeeMetrics({ data }: Props) {
       </div>
 
       {!hasData ? (
-        <div className="text-center py-12 text-[#8b8fa3]">
+        <div className="text-center py-12 text-[#6b7084]">
           <p className="text-lg mb-1">{current.month} 尚無資料</p>
           <p className="text-xs">請在 Google Sheets「蝦皮數據」頁籤填入該月數據</p>
         </div>
@@ -123,10 +112,11 @@ export default function ShopeeMetrics({ data }: Props) {
             {metrics.map((m) => (
               <div
                 key={m.label}
-                className={`bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] border-l-4 ${METRIC_ACCENTS[m.label] || "border-gray-500"}`}
+                className="bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] relative overflow-hidden"
               >
-                <div className="text-xs text-[#8b8fa3]">{m.label}</div>
-                <div className={`text-lg font-bold mt-1 ${METRIC_VALUE_COLORS[m.label] || "text-white"}`}>{m.value}</div>
+                <div className="text-xs text-[#6b7084]">{m.label}</div>
+                <div className="text-lg font-bold text-[#e4e6f0] mt-1">{m.value}</div>
+                <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${METRIC_BARS[m.label] || "bg-gray-400/50"} rounded-b-lg`} />
               </div>
             ))}
           </div>
@@ -134,10 +124,10 @@ export default function ShopeeMetrics({ data }: Props) {
           {/* Conversion Funnel */}
           <h4 className="text-sm font-medium text-[#8b8fa3] mb-3">轉換漏斗</h4>
           <div className="space-y-3">
-            <FunnelBar label="訪客" value={current.visitors} max={current.visitors} color="#f97316" />
-            <FunnelBar label="聊聊訪客" value={current.chatVisitors} max={current.visitors} color="#3b82f6" sub={current.inquiryRate} />
-            <FunnelBar label="已回應" value={current.respondedChats} max={current.visitors} color="#22c55e" sub={current.responseRate} />
-            <FunnelBar label="買家下單" value={current.buyers} max={current.visitors} color="#ef4444" sub={current.conversionRate} />
+            <FunnelBar label="訪客" value={current.visitors} max={current.visitors} color="#d4a06a" />
+            <FunnelBar label="聊聊訪客" value={current.chatVisitors} max={current.visitors} color="#7c9ec4" sub={current.inquiryRate} />
+            <FunnelBar label="已回應" value={current.respondedChats} max={current.visitors} color="#8bb89e" sub={current.responseRate} />
+            <FunnelBar label="買家下單" value={current.buyers} max={current.visitors} color="#c48080" sub={current.conversionRate} />
           </div>
 
           {current.unrespondedChats > 0 && (

@@ -3,14 +3,27 @@
 import { Line } from "react-chartjs-2";
 import { DayData } from "@/lib/fetchData";
 
+/* Muted, desaturated palette */
 const PLATFORM_COLORS = [
-  "#3b82f6", "#22c55e", "#eab308", "#ef4444",
+  "#7c9ec4", // slate blue
+  "#8bb89e", // sage green
+  "#d4b873", // warm gold
+  "#c48080", // dusty rose
 ];
 
 const BRAND_COLORS = [
-  "#a855f7", "#06b6d4", "#f97316", "#ec4899",
-  "#84cc16", "#14b8a6", "#f43f5e", "#8b5cf6",
-  "#fb923c", "#2dd4bf", "#e879f9", "#fbbf24",
+  "#a894c4", // lavender
+  "#7db5b8", // muted teal
+  "#c9976b", // warm peach
+  "#b88a9e", // dusty pink
+  "#98b876", // sage
+  "#7ba8a6", // sea green
+  "#c4907e", // terracotta
+  "#9088b8", // periwinkle
+  "#c4a87c", // sand
+  "#7eb8a0", // jade
+  "#b890b8", // orchid
+  "#c4b070", // wheat
 ];
 
 interface Props {
@@ -23,7 +36,6 @@ interface Props {
 export default function TrendChart({ days, platformNames, brandNames, selectedLines }: Props) {
   const labels = days.map((d) => d.date);
 
-  // Build all available lines
   const allLines: { key: string; label: string; getData: (d: DayData) => number; color: string; dashed: boolean }[] = [];
 
   platformNames.forEach((name, i) => {
@@ -48,7 +60,7 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
 
   const activeLines = selectedLines.length > 0
     ? allLines.filter((l) => selectedLines.includes(l.key))
-    : allLines; // show all if nothing selected
+    : allLines;
 
   const datasets = activeLines.map((line) => ({
     label: line.label,
@@ -63,12 +75,11 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
     borderDash: line.dashed ? [5, 3] : [],
   }));
 
-  // Always add total line
   datasets.unshift({
     label: "每日總計",
     data: days.map((d) => d.dailyTotal),
-    borderColor: "#ffffff",
-    backgroundColor: "#ffffff20",
+    borderColor: "#c0c3d1",
+    backgroundColor: "#c0c3d120",
     borderWidth: 2.5,
     pointRadius: 4,
     pointHoverRadius: 7,
@@ -79,7 +90,7 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
 
   return (
     <div className="bg-[#1a1d2e] rounded-xl p-4 md:p-6 border border-[#2a2e45]">
-      <h3 className="text-lg font-semibold mb-4 text-white">每日進線趨勢</h3>
+      <h3 className="text-lg font-semibold mb-4 text-[#e4e6f0]">每日進線趨勢</h3>
       <div className="h-[300px] md:h-[400px]">
         <Line
           data={{ labels, datasets }}
@@ -95,6 +106,7 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
                   usePointStyle: true,
                   pointStyle: "circle",
                   font: { size: 11 },
+                  color: "#8b8fa3",
                 },
               },
               tooltip: {
@@ -107,8 +119,8 @@ export default function TrendChart({ days, platformNames, brandNames, selectedLi
               },
             },
             scales: {
-              x: { grid: { display: false } },
-              y: { beginAtZero: true, grid: { color: "#2a2e4530" } },
+              x: { grid: { display: false }, ticks: { color: "#6b7084" } },
+              y: { beginAtZero: true, grid: { color: "#2a2e4530" }, ticks: { color: "#6b7084" } },
             },
           }}
         />

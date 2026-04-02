@@ -6,16 +6,25 @@ import ChartSetup from "@/components/ChartSetup";
 import KPICards from "@/components/KPICards";
 import TrendChart from "@/components/TrendChart";
 import PieChart from "@/components/PieChart";
-import DateFilter from "@/components/DateFilter";
+import DateFilter, { DateRange } from "@/components/DateFilter";
 import DetailTable from "@/components/DetailTable";
 import ShopeeMetrics from "@/components/ShopeeMetrics";
 import CategoryBreakdown from "@/components/CategoryBreakdown";
+
+/** Convert "3/30" → "2026-03-30" for comparison */
+function toISO(shortDate: string): string {
+  const parts = shortDate.split("/");
+  if (parts.length !== 2) return "";
+  return `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
+}
 
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [range, setRange] = useState<"all" | "7d" | "14d" | "30d">("all");
+  const [range, setRange] = useState<DateRange>("all");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
   const [selectedLines, setSelectedLines] = useState<string[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -36,6 +45,12 @@ export default function Home() {
           if (total > 0) keys.push(`b_${name}`);
         });
         setSelectedLines(keys);
+
+        // Set custom date defaults
+        if (d.days.length > 0) {
+          setCustomStart(toISO(d.days[0].date));
+          setCustomEnd(toISO(d.days[d.days.length - 1].date));
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -47,8 +62,14 @@ export default function Home() {
     if (range === "7d") days = days.slice(-7);
     else if (range === "14d") days = days.slice(-14);
     else if (range === "30d") days = days.slice(-30);
+    else if (range === "custom" && customStart && customEnd) {
+      days = days.filter((d) => {
+        const iso = toISO(d.date);
+        return iso >= customStart && iso <= customEnd;
+      });
+    }
     return { ...data, days, grandTotal: days.reduce((s, d) => s + d.dailyTotal, 0) };
-  }, [data, range]);
+  }, [data, range, customStart, customEnd]);
 
   const toggleLine = (key: string) => {
     setSelectedLines((prev) =>
@@ -56,11 +77,17 @@ export default function Home() {
     );
   };
 
+  const handleCustomDateChange = (start: string, end: string) => {
+    setCustomStart(start);
+    setCustomEnd(end);
+    setRange("custom");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <div className="inline-block w-10 h-10 border-4 border-sky-400/60 border-t-transparent rounded-full animate-spin mb-4" />
           <p className="text-[#8b8fa3]">載入資料中...</p>
         </div>
       </div>
@@ -85,10 +112,10 @@ export default function Home() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">客服進線監控</h1>
-          <p className="text-sm text-[#8b8fa3] mt-1">Customer Service Dashboard</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#e4e6f0]">客服進線監控</h1>
+          <p className="text-sm text-[#6b7084] mt-1">Customer Service Dashboard</p>
         </div>
-        <div className="text-xs text-[#8b8fa3] bg-[#1a1d2e] px-3 py-1.5 rounded-lg border border-[#2a2e45]">
+        <div className="text-xs text-[#6b7084] bg-[#1a1d2e] px-3 py-1.5 rounded-lg border border-[#2a2e45]">
           最後更新：{lastUpdated}
         </div>
       </div>
@@ -100,10 +127,14 @@ export default function Home() {
       <DateFilter
         range={range}
         onRangeChange={setRange}
+        customStart={customStart}
+        customEnd={customEnd}
+        onCustomDateChange={handleCustomDateChange}
         selectedLines={selectedLines}
         platformNames={filteredData.platformNames}
         brandNames={filteredData.brandNames}
         onLineToggle={toggleLine}
+        availableDates={data?.days.map((d) => d.date) || []}
       />
 
       {/* Trend Chart + Platform Pie */}
@@ -138,7 +169,7 @@ export default function Home() {
       />
 
       {/* Footer */}
-      <footer className="text-center text-xs text-[#8b8fa3] py-4 border-t border-[#2a2e45]">
+      <footer className="text-center text-xs text-[#6b7084] py-4 border-t border-[#2a2e45]">
         2C 客服進線監控系統 &copy; {new Date().getFullYear()}
       </footer>
     </main>

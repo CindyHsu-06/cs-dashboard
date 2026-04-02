@@ -3,14 +3,15 @@
 import { Doughnut } from "react-chartjs-2";
 import { DayData } from "@/lib/fetchData";
 
+/* Muted palette matching TrendChart */
 const PLATFORM_COLORS = [
-  "#3b82f6", "#22c55e", "#eab308", "#ef4444",
+  "#7c9ec4", "#8bb89e", "#d4b873", "#c48080",
 ];
 
 const BRAND_COLORS = [
-  "#a855f7", "#06b6d4", "#f97316", "#ec4899",
-  "#84cc16", "#14b8a6", "#f43f5e", "#8b5cf6",
-  "#fb923c", "#2dd4bf", "#e879f9", "#fbbf24",
+  "#a894c4", "#7db5b8", "#c9976b", "#b88a9e",
+  "#98b876", "#7ba8a6", "#c4907e", "#9088b8",
+  "#c4a87c", "#7eb8a0", "#b890b8", "#c4b070",
 ];
 
 interface Props {
@@ -21,19 +22,16 @@ interface Props {
 }
 
 export default function PieChart({ days, platformNames, brandNames, selectedLines }: Props) {
-  // Build labels + totals based on what's selected
   const entries: { label: string; total: number; color: string }[] = [];
 
-  // Always include platforms
   platformNames.forEach((name, i) => {
     const total = days.reduce((sum, d) => sum + (d.platforms[name] ?? 0), 0);
     entries.push({ label: name, total, color: PLATFORM_COLORS[i % PLATFORM_COLORS.length] });
   });
 
-  // Include selected brands
   const selectedBrandKeys = selectedLines.filter((k) => k.startsWith("b_"));
   selectedBrandKeys.forEach((key) => {
-    const name = key.slice(2); // remove "b_" prefix
+    const name = key.slice(2);
     const bi = brandNames.indexOf(name);
     if (bi === -1) return;
     const total = days.reduce((sum, d) => sum + (d.brands[name] ?? 0), 0);
@@ -45,7 +43,7 @@ export default function PieChart({ days, platformNames, brandNames, selectedLine
 
   return (
     <div className="bg-[#1a1d2e] rounded-xl p-4 md:p-6 border border-[#2a2e45]">
-      <h3 className="text-lg font-semibold mb-4 text-white">
+      <h3 className="text-lg font-semibold mb-4 text-[#e4e6f0]">
         {hasSelectedBrands ? "平台 + mo+ 佔比" : "平台佔比"}
       </h3>
       <div className="h-[380px] flex items-center justify-center">
@@ -67,7 +65,7 @@ export default function PieChart({ days, platformNames, brandNames, selectedLine
             plugins: {
               legend: {
                 position: "bottom",
-                labels: { padding: 10, usePointStyle: true, pointStyle: "circle", font: { size: 11 } },
+                labels: { padding: 10, usePointStyle: true, pointStyle: "circle", font: { size: 11 }, color: "#8b8fa3" },
               },
               tooltip: {
                 backgroundColor: "#1a1d2e",
