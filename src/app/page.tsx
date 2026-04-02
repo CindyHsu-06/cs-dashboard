@@ -6,7 +6,7 @@ import ChartSetup from "@/components/ChartSetup";
 import KPICards from "@/components/KPICards";
 import TrendChart from "@/components/TrendChart";
 import PieChart from "@/components/PieChart";
-import BrandBarChart from "@/components/BrandBarChart";
+import BrandCharts from "@/components/BrandCharts";
 import DateFilter from "@/components/DateFilter";
 import DetailTable from "@/components/DetailTable";
 import ShopeeMetrics from "@/components/ShopeeMetrics";
@@ -106,8 +106,8 @@ export default function Home() {
         <PieChart days={filteredData.days} platformNames={filteredData.platformNames} />
       </div>
 
-      {/* mo+ Brand Bar Chart */}
-      <BrandBarChart days={filteredData.days} brandNames={filteredData.brandNames} />
+      {/* mo+ Brand Charts (bar + trend + pie) */}
+      <BrandCharts days={filteredData.days} brandNames={filteredData.brandNames} />
 
       {/* Shopee Metrics */}
       <ShopeeMetrics data={filteredData.shopeeData} />
