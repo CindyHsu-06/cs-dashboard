@@ -21,8 +21,14 @@ function getCatValue(d: CategoryData, key: CatKey): number | null {
   return d[key];
 }
 
+const ALL_PLATFORMS = ["蝦皮", "LINE OA", "電話", "MOMO"];
+
 export default function CategoryBreakdown({ data }: Props) {
-  const platforms = Array.from(new Set(data.map((d) => d.platform)));
+  // Always show all 4 platforms, even if no data rows exist for some
+  const dataPlats = Array.from(new Set(data.map((d) => d.platform)));
+  const platforms = ALL_PLATFORMS.map((p) => p).concat(
+    dataPlats.filter((p) => !ALL_PLATFORMS.includes(p))
+  );
 
   const catTotals: Record<CatKey, number> = {
     preSale: 0, orderPayment: 0, logistics: 0,

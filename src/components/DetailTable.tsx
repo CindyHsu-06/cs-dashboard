@@ -26,7 +26,7 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
               ))}
               {brandNames.map((name) => (
                 <th key={name} className="text-right py-3 px-3 text-[#8b8fa3] font-medium whitespace-nowrap">
-                  {name}
+                  <span className="text-purple-400/70">mo+_</span>{name}
                 </th>
               ))}
               <th className="text-right py-3 px-3 text-[#8b8fa3] font-medium">小計</th>

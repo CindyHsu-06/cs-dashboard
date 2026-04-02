@@ -12,9 +12,17 @@ const COLORS = [
 interface Props {
   days: DayData[];
   brandNames: string[];
+  range: "all" | "7d" | "14d" | "30d";
 }
 
-export default function BrandCharts({ days, brandNames }: Props) {
+const RANGE_LABELS: Record<string, string> = {
+  "all": "全部期間",
+  "7d": "近 7 日",
+  "14d": "近 14 日",
+  "30d": "近 30 日",
+};
+
+export default function BrandCharts({ days, brandNames, range }: Props) {
   const brandTotals = brandNames.map((name) =>
     days.reduce((sum, d) => sum + (d.brands[name] ?? 0), 0)
   );
@@ -29,9 +37,14 @@ export default function BrandCharts({ days, brandNames }: Props) {
   return (
     <div className="space-y-6">
       <div className="bg-[#1a1d2e] rounded-xl p-4 md:p-6 border border-[#2a2e45]">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-white">mo+ 品牌進線排行</h3>
-          <p className="text-xs text-[#8b8fa3] mt-1">以下品牌皆隸屬 MOMO（mo+）平台旗下賣場</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-white">mo+ 品牌進線排行</h3>
+            <p className="text-xs text-[#8b8fa3] mt-1">以下品牌皆隸屬 MOMO（mo+）平台旗下賣場</p>
+          </div>
+          <span className="text-xs bg-purple-600/20 text-purple-400 px-2.5 py-1 rounded-lg border border-purple-600/30">
+            {RANGE_LABELS[range]}｜{days[0]?.date ?? ""} ~ {days[days.length - 1]?.date ?? ""}
+          </span>
         </div>
         <div className="h-[350px]">
           <Bar

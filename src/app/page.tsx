@@ -106,11 +106,11 @@ export default function Home() {
         <PieChart days={filteredData.days} platformNames={filteredData.platformNames} />
       </div>
 
-      {/* mo+ Brand Charts (bar + trend + pie) */}
-      <BrandCharts days={filteredData.days} brandNames={filteredData.brandNames} />
-
       {/* Shopee Metrics */}
       <ShopeeMetrics data={filteredData.shopeeData} />
+
+      {/* mo+ Brand Charts (bar + trend + pie) */}
+      <BrandCharts days={filteredData.days} brandNames={filteredData.brandNames} range={range} />
 
       {/* Issue Category Breakdown */}
       <CategoryBreakdown data={filteredData.categoryData} />
