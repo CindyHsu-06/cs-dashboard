@@ -26,21 +26,21 @@ export default function KPICards({ data }: Props) {
   const topPlatform = Object.entries(platformTotals).sort((a, b) => b[1] - a[1])[0];
 
   const cards = [
-    { label: "累計進線", value: grandTotal.toLocaleString(), icon: "📊", color: "from-blue-600 to-blue-800" },
-    { label: "今日進線", value: today?.dailyTotal.toLocaleString() ?? "0", icon: "📞", color: "from-emerald-600 to-emerald-800" },
-    { label: "日均進線", value: avgDaily.toFixed(1), icon: "📈", color: "from-purple-600 to-purple-800" },
+    { label: "累計進線", value: grandTotal.toLocaleString(), accent: "border-blue-500", valueColor: "text-blue-400" },
+    { label: "今日進線", value: today?.dailyTotal.toLocaleString() ?? "0", accent: "border-emerald-500", valueColor: "text-emerald-400" },
+    { label: "日均進線", value: avgDaily.toFixed(1), accent: "border-purple-500", valueColor: "text-purple-400" },
     {
       label: "較前日增減",
       value: `${dayChange >= 0 ? "+" : ""}${dayChange.toFixed(1)}%`,
-      icon: dayChange >= 0 ? "🔺" : "🔻",
-      color: dayChange >= 0 ? "from-red-600 to-red-800" : "from-green-600 to-green-800",
+      accent: dayChange >= 0 ? "border-red-500" : "border-green-500",
+      valueColor: dayChange >= 0 ? "text-red-400" : "text-green-400",
     },
     {
       label: "最大來源平台",
       value: topPlatform ? topPlatform[0] : "N/A",
       sub: topPlatform ? `${topPlatform[1]} 筆` : "",
-      icon: "🏆",
-      color: "from-amber-600 to-amber-800",
+      accent: "border-amber-500",
+      valueColor: "text-amber-400",
     },
   ];
 
@@ -49,14 +49,11 @@ export default function KPICards({ data }: Props) {
       {cards.map((card) => (
         <div
           key={card.label}
-          className={`bg-gradient-to-br ${card.color} rounded-xl p-4 shadow-lg border border-white/10`}
+          className={`bg-[#1a1d2e] rounded-lg p-4 border border-[#2a2e45] border-l-4 ${card.accent}`}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-white/70 font-medium">{card.label}</span>
-            <span className="text-lg">{card.icon}</span>
-          </div>
-          <div className="text-2xl font-bold text-white">{card.value}</div>
-          {card.sub && <div className="text-xs text-white/60 mt-1">{card.sub}</div>}
+          <div className="text-xs text-[#8b8fa3] font-medium mb-2">{card.label}</div>
+          <div className={`text-2xl font-bold ${card.valueColor}`}>{card.value}</div>
+          {card.sub && <div className="text-xs text-[#8b8fa3] mt-1">{card.sub}</div>}
         </div>
       ))}
     </div>

@@ -17,19 +17,45 @@ function FunnelBar({ label, value, max, color, sub }: {
         <span className="text-[#8b8fa3]">{label}</span>
         <span className="text-white font-semibold">{value.toLocaleString()}{sub && <span className="text-[#8b8fa3] text-xs ml-1">{sub}</span>}</span>
       </div>
-      <div className="h-3 bg-[#0f1117] rounded-full overflow-hidden">
+      <div className="h-2.5 bg-[#0f1117] rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(pct, 2)}%`, background: color }} />
       </div>
     </div>
   );
 }
 
+const METRIC_ACCENTS: Record<string, string> = {
+  "訪客數": "border-orange-500",
+  "聊聊詢問數": "border-blue-500",
+  "聊聊訪客數": "border-cyan-500",
+  "訪客詢問率": "border-purple-500",
+  "回應率": "border-emerald-500",
+  "平均對話時間": "border-amber-500",
+  "買家數": "border-pink-500",
+  "訂單數": "border-indigo-500",
+  "件數": "border-teal-500",
+  "銷售額": "border-red-500",
+  "轉換率": "border-lime-500",
+};
+
+const METRIC_VALUE_COLORS: Record<string, string> = {
+  "訪客數": "text-orange-400",
+  "聊聊詢問數": "text-blue-400",
+  "聊聊訪客數": "text-cyan-400",
+  "訪客詢問率": "text-purple-400",
+  "回應率": "text-emerald-400",
+  "平均對話時間": "text-amber-400",
+  "買家數": "text-pink-400",
+  "訂單數": "text-indigo-400",
+  "件數": "text-teal-400",
+  "銷售額": "text-red-400",
+  "轉換率": "text-lime-400",
+};
+
 export default function ShopeeMetrics({ data }: Props) {
-  // Filter out months with no actual data (visitors = 0)
   const validMonths = data.filter((d) => d.visitors > 0);
   const allMonths = data.map((d) => d.month);
 
-  // Default to latest month with data, or latest month overall
   const defaultMonth = validMonths.length > 0
     ? validMonths[validMonths.length - 1].month
     : (allMonths[allMonths.length - 1] || "");
@@ -42,17 +68,17 @@ export default function ShopeeMetrics({ data }: Props) {
   const hasData = current.visitors > 0;
 
   const metrics = [
-    { label: "訪客數", value: current.visitors.toLocaleString(), color: "from-orange-500 to-orange-700" },
-    { label: "聊聊詢問數", value: current.chatInquiries.toLocaleString(), color: "from-blue-500 to-blue-700" },
-    { label: "聊聊訪客數", value: current.chatVisitors.toLocaleString(), color: "from-cyan-500 to-cyan-700" },
-    { label: "訪客詢問率", value: current.inquiryRate, color: "from-purple-500 to-purple-700" },
-    { label: "回應率", value: current.responseRate, color: "from-emerald-500 to-emerald-700" },
-    { label: "平均對話時間", value: current.avgChatTime, color: "from-amber-500 to-amber-700" },
-    { label: "買家數", value: current.buyers.toLocaleString(), color: "from-pink-500 to-pink-700" },
-    { label: "訂單數", value: current.orders.toLocaleString(), color: "from-indigo-500 to-indigo-700" },
-    { label: "件數", value: current.items.toLocaleString(), color: "from-teal-500 to-teal-700" },
-    { label: "銷售額", value: `$${current.sales.toLocaleString()}`, color: "from-red-500 to-red-700" },
-    { label: "轉換率", value: current.conversionRate, color: "from-lime-500 to-lime-700" },
+    { label: "訪客數", value: current.visitors.toLocaleString() },
+    { label: "聊聊詢問數", value: current.chatInquiries.toLocaleString() },
+    { label: "聊聊訪客數", value: current.chatVisitors.toLocaleString() },
+    { label: "訪客詢問率", value: current.inquiryRate },
+    { label: "回應率", value: current.responseRate },
+    { label: "平均對話時間", value: current.avgChatTime },
+    { label: "買家數", value: current.buyers.toLocaleString() },
+    { label: "訂單數", value: current.orders.toLocaleString() },
+    { label: "件數", value: current.items.toLocaleString() },
+    { label: "銷售額", value: `$${current.sales.toLocaleString()}` },
+    { label: "轉換率", value: current.conversionRate },
   ];
 
   return (
@@ -62,7 +88,6 @@ export default function ShopeeMetrics({ data }: Props) {
           <h3 className="text-lg font-semibold text-white">蝦皮聊聊數據</h3>
           <p className="text-xs text-[#8b8fa3] mt-1">資料來源：蝦皮賣家中心匯出（各賣場加總）</p>
         </div>
-        {/* Month selector */}
         <div className="flex gap-2">
           {allMonths.map((m) => {
             const monthHasData = validMonths.some((v) => v.month === m);
@@ -96,9 +121,12 @@ export default function ShopeeMetrics({ data }: Props) {
           {/* KPI Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
             {metrics.map((m) => (
-              <div key={m.label} className={`bg-gradient-to-br ${m.color} rounded-lg p-3 border border-white/10`}>
-                <div className="text-xs text-white/70">{m.label}</div>
-                <div className="text-lg font-bold text-white mt-1">{m.value}</div>
+              <div
+                key={m.label}
+                className={`bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] border-l-4 ${METRIC_ACCENTS[m.label] || "border-gray-500"}`}
+              >
+                <div className="text-xs text-[#8b8fa3]">{m.label}</div>
+                <div className={`text-lg font-bold mt-1 ${METRIC_VALUE_COLORS[m.label] || "text-white"}`}>{m.value}</div>
               </div>
             ))}
           </div>
