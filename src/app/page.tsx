@@ -104,7 +104,12 @@ export default function Home() {
             selectedLines={selectedLines}
           />
         </div>
-        <PieChart days={filteredData.days} platformNames={filteredData.platformNames} />
+        <PieChart
+          days={filteredData.days}
+          platformNames={filteredData.platformNames}
+          brandNames={filteredData.brandNames}
+          selectedLines={selectedLines}
+        />
       </div>
 
       {/* Shopee Metrics */}
