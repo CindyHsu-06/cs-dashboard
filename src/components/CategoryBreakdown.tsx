@@ -6,60 +6,30 @@ interface Props {
   data: CategoryData[];
 }
 
-const CATEGORIES = [
-  {
-    key: "preSale" as const,
-    label: "售前諮詢",
-    desc: "促銷折扣、商品規格/文案問題、庫存/補貨詢問",
-    color: "bg-blue-500",
-    icon: "💬",
-  },
-  {
-    key: "orderPayment" as const,
-    label: "訂單/金流",
-    desc: "付款問題、取消/修改訂單、發票/載具問題、退款進度",
-    color: "bg-amber-500",
-    icon: "💳",
-  },
-  {
-    key: "logistics" as const,
-    label: "物流配送",
-    desc: "配送進度、包裹遺失、更改收件地址/門市、超取問題",
-    color: "bg-emerald-500",
-    icon: "🚚",
-  },
-  {
-    key: "productIssue" as const,
-    label: "商品問題",
-    desc: "寄錯/漏寄商品、商品瑕疵、使用/操作教學",
-    color: "bg-orange-500",
-    icon: "📦",
-  },
-  {
-    key: "afterSale" as const,
-    label: "售後服務",
-    desc: "退換貨申請/進度、維修諮詢",
-    color: "bg-purple-500",
-    icon: "🔧",
-  },
-  {
-    key: "complaint" as const,
-    label: "客訴/其他",
-    desc: "服務態度、平台系統異常、建議反饋",
-    color: "bg-red-500",
-    icon: "⚠️",
-  },
+type CatKey = "preSale" | "orderPayment" | "logistics" | "productIssue" | "afterSale" | "complaint";
+
+const CATEGORIES: { key: CatKey; label: string; desc: string; color: string; icon: string }[] = [
+  { key: "preSale", label: "售前諮詢", desc: "促銷折扣、商品規格/文案問題、庫存/補貨詢問", color: "bg-blue-500", icon: "💬" },
+  { key: "orderPayment", label: "訂單/金流", desc: "付款問題、取消/修改訂單、發票/載具問題、退款進度", color: "bg-amber-500", icon: "💳" },
+  { key: "logistics", label: "物流配送", desc: "配送進度、包裹遺失、更改收件地址/門市、超取問題", color: "bg-emerald-500", icon: "🚚" },
+  { key: "productIssue", label: "商品問題", desc: "寄錯/漏寄商品、商品瑕疵、使用/操作教學", color: "bg-orange-500", icon: "📦" },
+  { key: "afterSale", label: "售後服務", desc: "退換貨申請/進度、維修諮詢", color: "bg-purple-500", icon: "🔧" },
+  { key: "complaint", label: "客訴/其他", desc: "服務態度、平台系統異常、建議反饋", color: "bg-red-500", icon: "⚠️" },
 ];
 
-type CatKey = typeof CATEGORIES[number]["key"];
+function getCatValue(d: CategoryData, key: CatKey): number | null {
+  return d[key];
+}
 
 export default function CategoryBreakdown({ data }: Props) {
   const platforms = [...new Set(data.map((d) => d.platform))];
 
-  // Get totals per category
-  const catTotals: Record<CatKey, number> = {} as Record<CatKey, number>;
+  const catTotals: Record<CatKey, number> = {
+    preSale: 0, orderPayment: 0, logistics: 0,
+    productIssue: 0, afterSale: 0, complaint: 0,
+  };
   CATEGORIES.forEach((cat) => {
-    catTotals[cat.key] = data.reduce((sum, d) => sum + (d[cat.key] ?? 0), 0);
+    catTotals[cat.key] = data.reduce((sum, d) => sum + (getCatValue(d, cat.key) ?? 0), 0);
   });
   const grandTotal = Object.values(catTotals).reduce((s, v) => s + v, 0);
 
@@ -88,7 +58,6 @@ export default function CategoryBreakdown({ data }: Props) {
                 <div className="text-xs text-[#8b8fa3] mt-1">{pct}%</div>
               )}
               <div className={`absolute bottom-0 left-0 right-0 h-1 ${cat.color} rounded-b-lg opacity-60`} />
-              {/* Tooltip on hover */}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#232740] border border-[#2a2e45] rounded-lg text-xs text-[#8b8fa3] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                 {cat.desc}
               </div>
@@ -115,13 +84,13 @@ export default function CategoryBreakdown({ data }: Props) {
             {platforms.map((platform) => {
               const row = data.find((d) => d.platform === platform);
               const rowTotal = row
-                ? CATEGORIES.reduce((s, cat) => s + (row[cat.key] ?? 0), 0)
+                ? CATEGORIES.reduce((s, cat) => s + (getCatValue(row, cat.key) ?? 0), 0)
                 : 0;
               return (
                 <tr key={platform} className="border-b border-[#2a2e45]/50 hover:bg-[#232740] transition-colors">
                   <td className="py-2.5 px-3 font-medium text-white">{platform}</td>
                   {CATEGORIES.map((cat) => {
-                    const val = row?.[cat.key];
+                    const val = row ? getCatValue(row, cat.key) : null;
                     return (
                       <td key={cat.key} className="text-center py-2.5 px-3 tabular-nums">
                         {val !== null && val !== undefined ? (
