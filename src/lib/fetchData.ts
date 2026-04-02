@@ -211,7 +211,9 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     brandNames.forEach((name, bi) => {
       brands[name] = brandRows[bi]?.[di] ?? 0;
     });
-    const dailyTotal = Object.values(platforms).reduce((s, v) => s + v, 0);
+    const platformTotal = Object.values(platforms).reduce((s, v) => s + v, 0);
+    const brandTotal = Object.values(brands).reduce((s, v) => s + v, 0);
+    const dailyTotal = platformTotal + brandTotal;
     return { date, platforms, brands, dailyTotal };
   });
 
