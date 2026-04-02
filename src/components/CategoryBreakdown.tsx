@@ -22,7 +22,7 @@ function getCatValue(d: CategoryData, key: CatKey): number | null {
 }
 
 export default function CategoryBreakdown({ data }: Props) {
-  const platforms = [...new Set(data.map((d) => d.platform))];
+  const platforms = Array.from(new Set(data.map((d) => d.platform)));
 
   const catTotals: Record<CatKey, number> = {
     preSale: 0, orderPayment: 0, logistics: 0,
