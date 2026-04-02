@@ -48,7 +48,7 @@ export default function PieChart({ days, platformNames, brandNames, selectedLine
       <h3 className="text-lg font-semibold mb-4 text-white">
         {hasSelectedBrands ? "平台 + mo+ 佔比" : "平台佔比"}
       </h3>
-      <div className="h-[280px] flex items-center justify-center">
+      <div className="h-[380px] flex items-center justify-center">
         <Doughnut
           data={{
             labels: entries.map((e) => e.label),
@@ -66,8 +66,8 @@ export default function PieChart({ days, platformNames, brandNames, selectedLine
             cutout: "55%",
             plugins: {
               legend: {
-                position: "right",
-                labels: { padding: 12, usePointStyle: true, pointStyle: "circle", font: { size: 11 } },
+                position: "bottom",
+                labels: { padding: 10, usePointStyle: true, pointStyle: "circle", font: { size: 11 } },
               },
               tooltip: {
                 backgroundColor: "#1a1d2e",
