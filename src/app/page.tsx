@@ -111,9 +111,12 @@ export default function Home() {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#e4e6f0]">客服進線監控</h1>
-          <p className="text-sm text-[#6b7084] mt-1">Customer Service Dashboard</p>
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpg" alt="Logo" className="h-10 md:h-12 w-auto rounded" />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#e4e6f0]">客服進線監控</h1>
+            <p className="text-sm text-[#6b7084] mt-1">Customer Service Dashboard</p>
+          </div>
         </div>
         <div className="text-xs text-[#6b7084] bg-[#1a1d2e] px-3 py-1.5 rounded-lg border border-[#2a2e45]">
           最後更新：{lastUpdated}
