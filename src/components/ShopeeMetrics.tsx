@@ -141,14 +141,14 @@ export default function ShopeeMetrics({ data }: Props) {
             {metrics.map((m) => (
               <div
                 key={m.label}
-                className="bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] relative overflow-hidden"
+                className="bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] relative overflow-visible"
               >
                 <div className="text-xs text-[#6b7084] flex items-center">
                   {m.label}
                   {METRIC_TIPS[m.label] && <Tooltip tip={METRIC_TIPS[m.label]} />}
                 </div>
                 <div className="text-lg font-bold text-[#e4e6f0] mt-1">{m.value}</div>
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${METRIC_BARS[m.label] || "bg-gray-400/50"} rounded-b-lg`} />
+                <div className={`absolute bottom-0 inset-x-0 h-[3px] ${METRIC_BARS[m.label] || "bg-gray-400/50"}`} style={{ borderRadius: "0 0 8px 8px" }} />
               </div>
             ))}
           </div>
