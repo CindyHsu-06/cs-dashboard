@@ -27,6 +27,17 @@ function FunnelBar({ label, value, max, color, sub }: {
   );
 }
 
+function Tooltip({ tip }: { tip: string }) {
+  return (
+    <span className="relative group/tip ml-1 inline-flex cursor-help">
+      <span className="w-3.5 h-3.5 rounded-full border border-[#4a4e65] text-[10px] leading-[14px] text-center text-[#6b7084] inline-block">?</span>
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#232740] border border-[#2a2e45] rounded-lg text-xs text-[#c0c3d1] w-56 leading-relaxed opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-20 whitespace-normal">
+        {tip}
+      </span>
+    </span>
+  );
+}
+
 const METRIC_BARS: Record<string, string> = {
   "訪客數": "bg-amber-400/50",
   "聊聊詢問數": "bg-sky-400/50",
@@ -39,6 +50,22 @@ const METRIC_BARS: Record<string, string> = {
   "件數": "bg-teal-400/50",
   "銷售額": "bg-red-400/50",
   "轉換率": "bg-lime-400/50",
+};
+
+const METRIC_TIPS: Record<string, string> = {
+  "訪客數": "所選時間區間內瀏覽您的賣場和商品詳情頁的不重複訪客總數量。同一訪客多次瀏覽同一頁面將視為一個不重複訪客。",
+  "聊聊詢問數": "所選時間區間內進線詢問的對話。當賣家收到對話或出價的聊聊時，將會與同一對話中第一則聊聊的時間進行比較。如果時間相距超過12小時，則視為新的對話。聊聊廣播、問答小幫手和遊戲訊息將不被視為進線詢問。",
+  "聊聊訪客數": "所選時間區間內發起聊聊的不重複訪客總數量。",
+  "訪客詢問率": "聊聊訪客數 / 訪客數",
+  "已回應聊聊數": "所選時間區間內已回應的對話數。如果您在收到對話後，在12個小時內回應，則該對話將視為已回應。",
+  "未回應聊聊數": "所選時間區間內未回應的對話數。如果您在收到對話後，在12個小時後回應，則該對話將視為未回應。",
+  "回應率": "已回應聊聊數 / (已回應聊聊數 + 未回應聊聊數)",
+  "平均對話時間": "從子帳號分配到聊聊後到結束的平均對話時間。",
+  "買家數": "所選時間區間內在已回應聊聊對話後下單的買家數，如果買家在兩個聊聊對話後下單，會視為兩個買家。",
+  "訂單數": "在所選時間區間內，在已回應聊聊對話中的訂單總數。",
+  "件數": "在所選時間區間內，在已回應聊聊對話中的銷售總件數。",
+  "銷售額": "在所選時間區間內，在已回應聊聊對話中的銷售總金額。",
+  "轉換率": "下單的買家 / 已回應的聊聊",
 };
 
 export default function ShopeeMetrics({ data }: Props) {
@@ -61,6 +88,8 @@ export default function ShopeeMetrics({ data }: Props) {
     { label: "聊聊詢問數", value: current.chatInquiries.toLocaleString() },
     { label: "聊聊訪客數", value: current.chatVisitors.toLocaleString() },
     { label: "訪客詢問率", value: current.inquiryRate },
+    { label: "已回應聊聊數", value: current.respondedChats.toLocaleString() },
+    { label: "未回應聊聊數", value: current.unrespondedChats.toLocaleString() },
     { label: "回應率", value: current.responseRate },
     { label: "平均對話時間", value: current.avgChatTime },
     { label: "買家數", value: current.buyers.toLocaleString() },
@@ -114,7 +143,10 @@ export default function ShopeeMetrics({ data }: Props) {
                 key={m.label}
                 className="bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] relative overflow-hidden"
               >
-                <div className="text-xs text-[#6b7084]">{m.label}</div>
+                <div className="text-xs text-[#6b7084] flex items-center">
+                  {m.label}
+                  {METRIC_TIPS[m.label] && <Tooltip tip={METRIC_TIPS[m.label]} />}
+                </div>
                 <div className="text-lg font-bold text-[#e4e6f0] mt-1">{m.value}</div>
                 <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${METRIC_BARS[m.label] || "bg-gray-400/50"} rounded-b-lg`} />
               </div>
@@ -129,12 +161,6 @@ export default function ShopeeMetrics({ data }: Props) {
             <FunnelBar label="已回應" value={current.respondedChats} max={current.visitors} color="#8bb89e" sub={current.responseRate} />
             <FunnelBar label="買家下單" value={current.buyers} max={current.visitors} color="#c48080" sub={current.conversionRate} />
           </div>
-
-          {current.unrespondedChats > 0 && (
-            <div className="mt-4 bg-red-900/20 border border-red-700/30 rounded-lg p-3 text-sm text-red-400">
-              未回應聊聊數：{current.unrespondedChats} 筆
-            </div>
-          )}
         </>
       )}
     </div>
