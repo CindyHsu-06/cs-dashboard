@@ -15,7 +15,7 @@ function toISO(shortDate: string): string {
   return `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
 }
 
-function filterByCalendarDays(days: { date: string }[], n: number) {
+function filterByCalendarDays<T extends { date: string }>(days: T[], n: number): T[] {
   if (days.length === 0) return days;
   const lastISO = toISO(days[days.length - 1].date);
   const lastDate = new Date(lastISO);

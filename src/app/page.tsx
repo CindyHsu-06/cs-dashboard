@@ -19,7 +19,7 @@ function toISO(shortDate: string): string {
 }
 
 /** Filter days by N calendar days back from the last date in the array */
-function filterByCalendarDays(days: { date: string }[], n: number) {
+function filterByCalendarDays<T extends { date: string }>(days: T[], n: number): T[] {
   if (days.length === 0) return days;
   const lastISO = toISO(days[days.length - 1].date);
   const lastDate = new Date(lastISO);
