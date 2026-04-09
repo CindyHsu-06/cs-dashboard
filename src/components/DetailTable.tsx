@@ -15,6 +15,15 @@ function toISO(shortDate: string): string {
   return `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
 }
 
+function filterByCalendarDays(days: { date: string }[], n: number) {
+  if (days.length === 0) return days;
+  const lastISO = toISO(days[days.length - 1].date);
+  const lastDate = new Date(lastISO);
+  lastDate.setDate(lastDate.getDate() - (n - 1));
+  const cutoff = lastDate.toISOString().slice(0, 10);
+  return days.filter((d) => toISO(d.date) >= cutoff);
+}
+
 function Cell({ value }: { value: number }) {
   return (
     <td className={`text-right py-2.5 px-3 tabular-nums ${
@@ -48,9 +57,9 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
   }, []);
 
   const filtered = useMemo(() => {
-    if (tableRange === "7d") return days.slice(-7);
-    if (tableRange === "14d") return days.slice(-14);
-    if (tableRange === "30d") return days.slice(-30);
+    if (tableRange === "7d") return filterByCalendarDays(days, 7);
+    if (tableRange === "14d") return filterByCalendarDays(days, 14);
+    if (tableRange === "30d") return filterByCalendarDays(days, 30);
     if (tableRange === "custom" && startDate && endDate) {
       return days.filter((d) => {
         const iso = toISO(d.date);

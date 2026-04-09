@@ -18,6 +18,16 @@ function toISO(shortDate: string): string {
   return `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
 }
 
+/** Filter days by N calendar days back from the last date in the array */
+function filterByCalendarDays(days: { date: string }[], n: number) {
+  if (days.length === 0) return days;
+  const lastISO = toISO(days[days.length - 1].date);
+  const lastDate = new Date(lastISO);
+  lastDate.setDate(lastDate.getDate() - (n - 1));
+  const cutoff = lastDate.toISOString().slice(0, 10);
+  return days.filter((d) => toISO(d.date) >= cutoff);
+}
+
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,9 +69,9 @@ export default function Home() {
   const filteredData = useMemo(() => {
     if (!data) return null;
     let days = data.days;
-    if (range === "7d") days = days.slice(-7);
-    else if (range === "14d") days = days.slice(-14);
-    else if (range === "30d") days = days.slice(-30);
+    if (range === "7d") days = filterByCalendarDays(days, 7);
+    else if (range === "14d") days = filterByCalendarDays(days, 14);
+    else if (range === "30d") days = filterByCalendarDays(days, 30);
     else if (range === "custom" && customStart && customEnd) {
       days = days.filter((d) => {
         const iso = toISO(d.date);
