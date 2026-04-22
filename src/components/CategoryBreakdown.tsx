@@ -21,7 +21,7 @@ function getCatValue(d: CategoryData, key: CatKey): number | null {
   return d[key];
 }
 
-const ALL_PLATFORMS = ["蝦皮", "LINE OA", "電話", "MOMO"];
+const ALL_PLATFORMS = ["蝦皮", "LINE OA", "電話", "MOMO", "官網"];
 
 export default function CategoryBreakdown({ data }: Props) {
   const dataPlats = Array.from(new Set(data.map((d) => d.platform)));

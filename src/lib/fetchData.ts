@@ -191,14 +191,14 @@ export async function fetchDashboardData(): Promise<DashboardData> {
 
     const values = dateIndices.map((ci) => normalizeNumber(cols[ci] || "0"));
 
-    if (r <= 5) {
+    // Brand row: col[1] has a brand name (col[0] usually empty or "mo+")
+    // Platform row: col[0] has a platform name and col[1] is empty
+    if (col1 && col0 !== col1 && !["平台", "品牌"].includes(col0)) {
+      brandNames.push(col1);
+      brandRows.push(values);
+    } else if (col0) {
       platformNames.push(col0);
       platformRows.push(values);
-    } else {
-      if (col1) {
-        brandNames.push(col1);
-        brandRows.push(values);
-      }
     }
   }
 
