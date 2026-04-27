@@ -56,6 +56,7 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showCal, setShowCal] = useState(false);
+  const [displayYear, setDisplayYear] = useState(2026);
   const calRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -99,32 +100,41 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
     if (tableRange === "7d") return `近7日 · ${formatRange(maxDate, 7)}`;
     if (tableRange === "14d") return `近14日 · ${formatRange(maxDate, 14)}`;
     if (tableRange === "30d") return `近30日 · ${formatRange(maxDate, 30)}`;
-    if (tableRange === "custom" && matchedMonth) return `${parseInt(matchedMonth)}月 · ${shortDate(startDate)} ~ ${shortDate(endDate)}`;
+    if (tableRange === "custom" && matchedYearMonth.month) return `${matchedYearMonth.year}年${parseInt(matchedYearMonth.month)}月 · ${shortDate(startDate)} ~ ${shortDate(endDate)}`;
     if (tableRange === "custom" && startDate && endDate) return `自訂 · ${shortDate(startDate)} ~ ${shortDate(endDate)}`;
     return "選擇區間";
   }
 
   const isUnified = tableRange !== "all";
 
-  const availableMonths = Array.from(new Set(
-    days.map((d) => d.date.split("/")[0]?.padStart(2, "0") || "").filter(Boolean)
-  )).sort();
+  const availableYearMonths = new Set(
+    days.map((d) => {
+      const mm = d.date.split("/")[0]?.padStart(2, "0");
+      return mm ? `2026-${mm}` : "";
+    }).filter(Boolean)
+  );
 
   function selectMonth(mm: string) {
-    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
-    setStartDate(`2026-${mm}-01`);
-    setEndDate(`2026-${mm}-${String(lastDay).padStart(2, "0")}`);
+    const yyyy = String(displayYear);
+    const lastDay = new Date(displayYear, parseInt(mm), 0).getDate();
+    setStartDate(`${yyyy}-${mm}-01`);
+    setEndDate(`${yyyy}-${mm}-${String(lastDay).padStart(2, "0")}`);
     setTableRange("custom");
   }
 
-  const matchedMonth = (() => {
-    if (tableRange !== "custom") return "";
-    const m = startDate.match(/^2026-(\d{2})-01$/);
-    if (!m) return "";
-    const mm = m[1];
-    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
-    return endDate === `2026-${mm}-${String(lastDay).padStart(2, "0")}` ? mm : "";
+  const matchedYearMonth = (() => {
+    if (tableRange !== "custom") return { year: 0, month: "" };
+    const m = startDate.match(/^(\d{4})-(\d{2})-01$/);
+    if (!m) return { year: 0, month: "" };
+    const yyyy = m[1];
+    const mm = m[2];
+    const lastDay = new Date(parseInt(yyyy), parseInt(mm), 0).getDate();
+    if (endDate === `${yyyy}-${mm}-${String(lastDay).padStart(2, "0")}`) {
+      return { year: parseInt(yyyy), month: mm };
+    }
+    return { year: 0, month: "" };
   })();
+  const matchedMonth = matchedYearMonth.year === displayYear ? matchedYearMonth.month : "";
 
   return (
     <div className="bg-[#1a1d2e] rounded-xl border border-[#2a2e45] overflow-hidden">
@@ -184,12 +194,30 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
                 <div className="flex-1 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs text-[#8b8fa3]">按月選擇</span>
-                    <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setDisplayYear(displayYear - 1)}
+                        className="text-[#8b8fa3] hover:text-sky-300 transition-colors p-0.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <span className="text-sm text-[#c0c3d1] font-medium min-w-[40px] text-center tabular-nums">{displayYear}</span>
+                      <button
+                        onClick={() => setDisplayYear(displayYear + 1)}
+                        className="text-[#8b8fa3] hover:text-sky-300 transition-colors p-0.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5 mb-4">
                     {Array.from({ length: 12 }, (_, i) => {
                       const mm = String(i + 1).padStart(2, "0");
-                      const hasData = availableMonths.includes(mm);
+                      const hasData = availableYearMonths.has(`${displayYear}-${mm}`);
                       const isActive = matchedMonth === mm;
                       return (
                         <button

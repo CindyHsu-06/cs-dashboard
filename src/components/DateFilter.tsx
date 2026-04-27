@@ -32,6 +32,7 @@ export default function DateFilter({
   availableDates,
 }: Props) {
   const [showCalendar, setShowCalendar] = useState(false);
+  const [displayYear, setDisplayYear] = useState(2026);
   const calRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,25 +48,35 @@ export default function DateFilter({
   const minDate = availableDates.length > 0 ? toISODate(availableDates[0]) : "";
   const maxDate = availableDates.length > 0 ? toISODate(availableDates[availableDates.length - 1]) : "";
 
-  const availableMonths = Array.from(new Set(
-    availableDates.map((d) => d.split("/")[0]?.padStart(2, "0") || "").filter(Boolean)
-  )).sort();
+  // All data is currently in 2026; future-proofed for cross-year data
+  const availableYearMonths = new Set(
+    availableDates.map((d) => {
+      const mm = d.split("/")[0]?.padStart(2, "0");
+      return mm ? `2026-${mm}` : "";
+    }).filter(Boolean)
+  );
 
   function selectMonth(mm: string) {
-    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
-    const start = `2026-${mm}-01`;
-    const end = `2026-${mm}-${String(lastDay).padStart(2, "0")}`;
+    const yyyy = String(displayYear);
+    const lastDay = new Date(displayYear, parseInt(mm), 0).getDate();
+    const start = `${yyyy}-${mm}-01`;
+    const end = `${yyyy}-${mm}-${String(lastDay).padStart(2, "0")}`;
     onCustomDateChange(start, end);
   }
 
-  const matchedMonth = (() => {
-    if (range !== "custom") return "";
-    const m = customStart.match(/^2026-(\d{2})-01$/);
-    if (!m) return "";
-    const mm = m[1];
-    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
-    return customEnd === `2026-${mm}-${String(lastDay).padStart(2, "0")}` ? mm : "";
+  const matchedYearMonth = (() => {
+    if (range !== "custom") return { year: 0, month: "" };
+    const m = customStart.match(/^(\d{4})-(\d{2})-01$/);
+    if (!m) return { year: 0, month: "" };
+    const yyyy = m[1];
+    const mm = m[2];
+    const lastDay = new Date(parseInt(yyyy), parseInt(mm), 0).getDate();
+    if (customEnd === `${yyyy}-${mm}-${String(lastDay).padStart(2, "0")}`) {
+      return { year: parseInt(yyyy), month: mm };
+    }
+    return { year: 0, month: "" };
   })();
+  const matchedMonth = matchedYearMonth.year === displayYear ? matchedYearMonth.month : "";
 
   const presets: { key: DateRange; label: string }[] = [
     { key: "7d", label: "近7日" },
@@ -77,7 +88,7 @@ export default function DateFilter({
     if (range === "7d") return `近7日 · ${formatRange(maxDate, 7)}`;
     if (range === "14d") return `近14日 · ${formatRange(maxDate, 14)}`;
     if (range === "30d") return `近30日 · ${formatRange(maxDate, 30)}`;
-    if (range === "custom" && matchedMonth) return `${parseInt(matchedMonth)}月 · ${shortDate(customStart)} ~ ${shortDate(customEnd)}`;
+    if (range === "custom" && matchedYearMonth.month) return `${matchedYearMonth.year}年${parseInt(matchedYearMonth.month)}月 · ${shortDate(customStart)} ~ ${shortDate(customEnd)}`;
     if (range === "custom" && customStart && customEnd) return `自訂 · ${shortDate(customStart)} ~ ${shortDate(customEnd)}`;
     return "選擇區間";
   }
@@ -144,12 +155,32 @@ export default function DateFilter({
               <div className="flex-1 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-[#8b8fa3]">按月選擇</span>
-                  <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setDisplayYear(displayYear - 1)}
+                      className="text-[#8b8fa3] hover:text-sky-300 transition-colors p-0.5"
+                      aria-label="Previous year"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span className="text-sm text-[#c0c3d1] font-medium min-w-[40px] text-center tabular-nums">{displayYear}</span>
+                    <button
+                      onClick={() => setDisplayYear(displayYear + 1)}
+                      className="text-[#8b8fa3] hover:text-sky-300 transition-colors p-0.5"
+                      aria-label="Next year"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5 mb-4">
                   {Array.from({ length: 12 }, (_, i) => {
                     const mm = String(i + 1).padStart(2, "0");
-                    const hasData = availableMonths.includes(mm);
+                    const hasData = availableYearMonths.has(`${displayYear}-${mm}`);
                     const isActive = matchedMonth === mm;
                     return (
                       <button
