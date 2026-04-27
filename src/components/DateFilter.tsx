@@ -54,12 +54,8 @@ export default function DateFilter({
   const minDate = availableDates.length > 0 ? toISODate(availableDates[0]) : "";
   const maxDate = availableDates.length > 0 ? toISODate(availableDates[availableDates.length - 1]) : "";
 
-  // Extract unique months from available dates
   const availableMonths = Array.from(new Set(
-    availableDates.map((d) => {
-      const parts = d.split("/");
-      return parts[0]?.padStart(2, "0") || "";
-    }).filter(Boolean)
+    availableDates.map((d) => d.split("/")[0]?.padStart(2, "0") || "").filter(Boolean)
   )).sort();
 
   function selectMonth(mm: string) {
@@ -69,7 +65,6 @@ export default function DateFilter({
     onCustomDateChange(start, end);
   }
 
-  // Detect if custom range matches a single full month
   const matchedMonth = (() => {
     if (range !== "custom") return "";
     const m = customStart.match(/^2026-(\d{2})-01$/);
@@ -113,63 +108,61 @@ export default function DateFilter({
             </svg>
             自訂
             {range === "custom" && customStart && customEnd && (
-              <span className="text-xs text-[#8b8fa3] ml-1">{customStart} ~ {customEnd}</span>
+              <span className="text-xs text-[#8b8fa3] ml-1">
+                {matchedMonth ? `${parseInt(matchedMonth)}月` : `${shortDate(customStart)} ~ ${shortDate(customEnd)}`}
+              </span>
             )}
           </button>
 
           {showCalendar && (
-            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 w-[320px]">
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-[#8b8fa3]">按月選擇</span>
-                  <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const mm = String(i + 1).padStart(2, "0");
-                    const hasData = availableMonths.includes(mm);
-                    const isActive = matchedMonth === mm;
-                    return (
-                      <button
-                        key={mm}
-                        onClick={() => hasData && selectMonth(mm)}
-                        disabled={!hasData}
-                        className={`text-sm py-2 rounded-lg transition-all ${
-                          isActive
-                            ? "bg-sky-500/20 text-sky-300 border border-sky-400/50 font-semibold"
-                            : hasData
-                            ? "text-[#c0c3d1] hover:bg-[#232740] border border-transparent"
-                            : "text-[#3a3e55] cursor-not-allowed border border-transparent"
-                        }`}
-                      >
-                        {MONTH_NAMES[i]}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-xl shadow-2xl z-50 w-[320px] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-[#8b8fa3]">按月選擇</span>
+                <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
               </div>
-              <div className="space-y-3 pt-3 border-t border-[#2a2e45]">
+              <div className="grid grid-cols-3 gap-1.5 mb-4">
+                {Array.from({ length: 12 }, (_, i) => {
+                  const mm = String(i + 1).padStart(2, "0");
+                  const hasData = availableMonths.includes(mm);
+                  const isActive = matchedMonth === mm;
+                  return (
+                    <button
+                      key={mm}
+                      onClick={() => { if (hasData) selectMonth(mm); }}
+                      disabled={!hasData}
+                      className={`text-sm py-2 rounded-lg transition-all ${
+                        isActive
+                          ? "bg-sky-500/20 text-sky-300 border border-sky-400/50 font-semibold"
+                          : hasData
+                          ? "text-[#c0c3d1] hover:bg-[#232740] border border-transparent"
+                          : "text-[#3a3e55] cursor-not-allowed border border-transparent"
+                      }`}
+                    >
+                      {MONTH_NAMES[i]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="border-t border-[#2a2e45] pt-3 space-y-2">
                 <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
-                <div>
-                  <label className="text-xs text-[#8b8fa3] block mb-1">開始日期</label>
+                <div className="flex items-center gap-2">
                   <input
                     type="date"
                     value={customStart}
                     min={minDate}
                     max={maxDate}
                     onChange={(e) => onCustomDateChange(e.target.value, customEnd)}
-                    className="w-full bg-[#0f1117] border border-[#2a2e45] rounded-lg px-3 py-2 text-sm text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                    className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
                   />
-                </div>
-                <div>
-                  <label className="text-xs text-[#8b8fa3] block mb-1">結束日期</label>
+                  <span className="text-[#6b7084] text-xs">~</span>
                   <input
                     type="date"
                     value={customEnd}
                     min={minDate}
                     max={maxDate}
                     onChange={(e) => onCustomDateChange(customStart, e.target.value)}
-                    className="w-full bg-[#0f1117] border border-[#2a2e45] rounded-lg px-3 py-2 text-sm text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                    className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -219,12 +212,15 @@ export default function DateFilter({
   );
 }
 
-/** Convert "3/30" or "4/2" to "2026-03-30" or "2026-04-02" */
 function toISODate(shortDate: string): string {
   const parts = shortDate.split("/");
   if (parts.length !== 2) return "";
-  const m = parts[0].padStart(2, "0");
-  const d = parts[1].padStart(2, "0");
-  const year = parseInt(m) >= 1 && parseInt(m) <= 12 ? "2026" : "2026";
-  return `${year}-${m}-${d}`;
+  return `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
+}
+
+function shortDate(iso: string): string {
+  if (!iso) return "";
+  const m = iso.match(/^\d{4}-(\d{2})-(\d{2})$/);
+  if (!m) return iso;
+  return `${parseInt(m[1])}/${parseInt(m[2])}`;
 }
