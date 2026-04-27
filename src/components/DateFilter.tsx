@@ -52,6 +52,31 @@ export default function DateFilter({
   const minDate = availableDates.length > 0 ? toISODate(availableDates[0]) : "";
   const maxDate = availableDates.length > 0 ? toISODate(availableDates[availableDates.length - 1]) : "";
 
+  // Extract unique months from available dates
+  const availableMonths = Array.from(new Set(
+    availableDates.map((d) => {
+      const parts = d.split("/");
+      return parts[0]?.padStart(2, "0") || "";
+    }).filter(Boolean)
+  )).sort();
+
+  function selectMonth(mm: string) {
+    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
+    const start = `2026-${mm}-01`;
+    const end = `2026-${mm}-${String(lastDay).padStart(2, "0")}`;
+    onCustomDateChange(start, end);
+  }
+
+  // Detect if custom range matches a single full month
+  const matchedMonth = (() => {
+    if (range !== "custom") return "";
+    const m = customStart.match(/^2026-(\d{2})-01$/);
+    if (!m) return "";
+    const mm = m[1];
+    const lastDay = new Date(2026, parseInt(mm), 0).getDate();
+    return customEnd === `2026-${mm}-${String(lastDay).padStart(2, "0")}` ? mm : "";
+  })();
+
   return (
     <div className="flex flex-col gap-3">
       {/* Date range */}
@@ -91,8 +116,28 @@ export default function DateFilter({
           </button>
 
           {showCalendar && (
-            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 min-w-[260px]">
-              <div className="space-y-3">
+            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
+              {availableMonths.length > 0 && (
+                <div className="mb-3">
+                  <label className="text-xs text-[#8b8fa3] block mb-1.5">按月選擇</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {availableMonths.map((mm) => (
+                      <button
+                        key={mm}
+                        onClick={() => selectMonth(mm)}
+                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                          matchedMonth === mm
+                            ? "bg-[#2a3a5c] text-sky-300 border-sky-400/40"
+                            : "bg-[#0f1117] text-[#8b8fa3] border-[#2a2e45] hover:bg-[#232740]"
+                        }`}
+                      >
+                        {parseInt(mm)}月
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="space-y-3 pt-3 border-t border-[#2a2e45]">
                 <div>
                   <label className="text-xs text-[#8b8fa3] block mb-1">開始日期</label>
                   <input
