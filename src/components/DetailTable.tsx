@@ -3,6 +3,8 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { DayData } from "@/lib/fetchData";
 
+const MONTH_NAMES = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+
 interface Props {
   days: DayData[];
   platformNames: string[];
@@ -132,28 +134,38 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
               自訂
             </button>
             {showCal && (
-              <div className="absolute top-full right-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 min-w-[280px]">
-                {availableMonths.length > 0 && (
-                  <div className="mb-3">
-                    <label className="text-xs text-[#8b8fa3] block mb-1.5">按月選擇</label>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {availableMonths.map((mm) => (
+              <div className="absolute top-full right-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 w-[320px]">
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-[#8b8fa3]">按月選擇</span>
+                    <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const mm = String(i + 1).padStart(2, "0");
+                      const hasData = availableMonths.includes(mm);
+                      const isActive = matchedMonth === mm;
+                      return (
                         <button
                           key={mm}
-                          onClick={() => selectMonth(mm)}
-                          className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                            matchedMonth === mm
-                              ? "bg-[#2a3a5c] text-sky-300 border-sky-400/40"
-                              : "bg-[#0f1117] text-[#8b8fa3] border-[#2a2e45] hover:bg-[#232740]"
+                          onClick={() => hasData && selectMonth(mm)}
+                          disabled={!hasData}
+                          className={`text-sm py-2 rounded-lg transition-all ${
+                            isActive
+                              ? "bg-sky-500/20 text-sky-300 border border-sky-400/50 font-semibold"
+                              : hasData
+                              ? "text-[#c0c3d1] hover:bg-[#232740] border border-transparent"
+                              : "text-[#3a3e55] cursor-not-allowed border border-transparent"
                           }`}
                         >
-                          {parseInt(mm)}月
+                          {MONTH_NAMES[i]}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
                 <div className="space-y-3 pt-3 border-t border-[#2a2e45]">
+                  <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
                   <div>
                     <label className="text-xs text-[#8b8fa3] block mb-1">開始日期</label>
                     <input
