@@ -26,6 +26,21 @@ function filterByCalendarDays<T extends { date: string }>(days: T[], n: number):
   return days.filter((d) => toISO(d.date) >= cutoff);
 }
 
+function shortDate(iso: string): string {
+  if (!iso) return "";
+  const m = iso.match(/^\d{4}-(\d{2})-(\d{2})$/);
+  if (!m) return iso;
+  return `${parseInt(m[1])}/${parseInt(m[2])}`;
+}
+
+function formatRange(maxDate: string, days: number): string {
+  if (!maxDate) return "";
+  const end = new Date(maxDate);
+  const start = new Date(maxDate);
+  start.setDate(end.getDate() - (days - 1));
+  return `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
+}
+
 function Cell({ value }: { value: number }) {
   return (
     <td className={`text-right py-2.5 px-3 tabular-nums ${
@@ -74,12 +89,22 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
   const minDate = days.length > 0 ? toISO(days[0].date) : "";
   const maxDate = days.length > 0 ? toISO(days[days.length - 1].date) : "";
 
-  const ranges: { key: typeof tableRange; label: string }[] = [
+  const presets: { key: typeof tableRange; label: string }[] = [
     { key: "7d", label: "近7日" },
     { key: "14d", label: "近14日" },
     { key: "30d", label: "近30日" },
-    { key: "all", label: "全部" },
   ];
+
+  function getTriggerLabel() {
+    if (tableRange === "7d") return `近7日 · ${formatRange(maxDate, 7)}`;
+    if (tableRange === "14d") return `近14日 · ${formatRange(maxDate, 14)}`;
+    if (tableRange === "30d") return `近30日 · ${formatRange(maxDate, 30)}`;
+    if (tableRange === "custom" && matchedMonth) return `${parseInt(matchedMonth)}月 · ${shortDate(startDate)} ~ ${shortDate(endDate)}`;
+    if (tableRange === "custom" && startDate && endDate) return `自訂 · ${shortDate(startDate)} ~ ${shortDate(endDate)}`;
+    return "選擇區間";
+  }
+
+  const isUnified = tableRange !== "all";
 
   const availableMonths = Array.from(new Set(
     days.map((d) => d.date.split("/")[0]?.padStart(2, "0") || "").filter(Boolean)
@@ -106,24 +131,24 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 md:p-6 pb-0 gap-3">
         <h3 className="text-lg font-semibold text-[#e4e6f0]">明細表格</h3>
         <div className="flex gap-2 flex-wrap items-center">
-          {ranges.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => { setTableRange(r.key); setShowCal(false); }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                tableRange === r.key
-                  ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
-                  : "bg-[#0f1117] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+          {/* 全部 - separate */}
+          <button
+            onClick={() => { setTableRange("all"); setShowCal(false); }}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+              tableRange === "all"
+                ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
+                : "bg-[#0f1117] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
+            }`}
+          >
+            全部
+          </button>
+
+          {/* Unified picker */}
           <div className="relative" ref={calRef}>
             <button
-              onClick={() => { setShowCal(!showCal); if (tableRange !== "custom") setTableRange("custom"); }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                tableRange === "custom"
+              onClick={() => setShowCal(!showCal)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                isUnified
                   ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
                   : "bg-[#0f1117] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
               }`}
@@ -131,16 +156,37 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              自訂
+              {isUnified ? getTriggerLabel() : "選擇區間"}
+              <svg className={`w-3 h-3 transition-transform ${showCal ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
             {showCal && (
-              <div className="absolute top-full right-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-lg p-4 shadow-xl z-50 w-[320px]">
-                <div className="mb-4">
+              <div className="absolute top-full right-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-xl shadow-2xl z-50 flex w-[460px] overflow-hidden">
+                {/* Sidebar */}
+                <div className="w-[110px] bg-[#0f1117] border-r border-[#2a2e45] p-2 space-y-0.5">
+                  {presets.map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => { setTableRange(p.key); setShowCal(false); }}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
+                        tableRange === p.key
+                          ? "bg-sky-500/20 text-sky-300 font-medium"
+                          : "text-[#c0c3d1] hover:bg-[#1a1d2e]"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right - month grid + custom dates */}
+                <div className="flex-1 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs text-[#8b8fa3]">按月選擇</span>
                     <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5 mb-4">
                     {Array.from({ length: 12 }, (_, i) => {
                       const mm = String(i + 1).padStart(2, "0");
                       const hasData = availableMonths.includes(mm);
@@ -163,30 +209,27 @@ export default function DetailTable({ days, platformNames, brandNames }: Props) 
                       );
                     })}
                   </div>
-                </div>
-                <div className="space-y-3 pt-3 border-t border-[#2a2e45]">
-                  <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
-                  <div>
-                    <label className="text-xs text-[#8b8fa3] block mb-1">開始日期</label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      min={minDate}
-                      max={maxDate}
-                      onChange={(e) => { setStartDate(e.target.value); setTableRange("custom"); }}
-                      className="w-full bg-[#0f1117] border border-[#2a2e45] rounded-lg px-3 py-2 text-sm text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[#8b8fa3] block mb-1">結束日期</label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      min={minDate}
-                      max={maxDate}
-                      onChange={(e) => { setEndDate(e.target.value); setTableRange("custom"); }}
-                      className="w-full bg-[#0f1117] border border-[#2a2e45] rounded-lg px-3 py-2 text-sm text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
-                    />
+                  <div className="border-t border-[#2a2e45] pt-3 space-y-2">
+                    <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={startDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => { setStartDate(e.target.value); setTableRange("custom"); }}
+                        className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                      />
+                      <span className="text-[#6b7084] text-xs">~</span>
+                      <input
+                        type="date"
+                        value={endDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => { setEndDate(e.target.value); setTableRange("custom"); }}
+                        className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

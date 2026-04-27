@@ -44,13 +44,6 @@ export default function DateFilter({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const ranges: { key: DateRange; label: string }[] = [
-    { key: "7d", label: "近7日" },
-    { key: "14d", label: "近14日" },
-    { key: "30d", label: "近30日" },
-    { key: "all", label: "全部" },
-  ];
-
   const minDate = availableDates.length > 0 ? toISODate(availableDates[0]) : "";
   const maxDate = availableDates.length > 0 ? toISODate(availableDates[availableDates.length - 1]) : "";
 
@@ -74,31 +67,47 @@ export default function DateFilter({
     return customEnd === `2026-${mm}-${String(lastDay).padStart(2, "0")}` ? mm : "";
   })();
 
+  const presets: { key: DateRange; label: string }[] = [
+    { key: "7d", label: "近7日" },
+    { key: "14d", label: "近14日" },
+    { key: "30d", label: "近30日" },
+  ];
+
+  function getTriggerLabel() {
+    if (range === "7d") return `近7日 · ${formatRange(maxDate, 7)}`;
+    if (range === "14d") return `近14日 · ${formatRange(maxDate, 14)}`;
+    if (range === "30d") return `近30日 · ${formatRange(maxDate, 30)}`;
+    if (range === "custom" && matchedMonth) return `${parseInt(matchedMonth)}月 · ${shortDate(customStart)} ~ ${shortDate(customEnd)}`;
+    if (range === "custom" && customStart && customEnd) return `自訂 · ${shortDate(customStart)} ~ ${shortDate(customEnd)}`;
+    return "選擇區間";
+  }
+
+  // The "全部" button + the integrated picker button
+  const isUnified = range !== "all";
+
   return (
     <div className="flex flex-col gap-3">
-      {/* Date range */}
       <div className="flex gap-2 flex-wrap items-center">
         <span className="text-sm text-[#8b8fa3] mr-1">日期：</span>
-        {ranges.map((r) => (
-          <button
-            key={r.key}
-            onClick={() => { onRangeChange(r.key); setShowCalendar(false); }}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              range === r.key
-                ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
-                : "bg-[#1a1d2e] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
-            }`}
-          >
-            {r.label}
-          </button>
-        ))}
 
-        {/* Custom date picker */}
+        {/* 全部 - separate button */}
+        <button
+          onClick={() => { onRangeChange("all"); setShowCalendar(false); }}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            range === "all"
+              ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
+              : "bg-[#1a1d2e] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
+          }`}
+        >
+          全部
+        </button>
+
+        {/* Unified picker button (近7/14/30日 + 自訂) */}
         <div className="relative" ref={calRef}>
           <button
-            onClick={() => { setShowCalendar(!showCalendar); if (range !== "custom") onRangeChange("custom"); }}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-              range === "custom"
+            onClick={() => setShowCalendar(!showCalendar)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${
+              isUnified
                 ? "bg-[#2a3a5c] text-sky-300 border border-sky-400/40"
                 : "bg-[#1a1d2e] text-[#8b8fa3] hover:bg-[#232740] border border-[#2a2e45]"
             }`}
@@ -106,64 +115,82 @@ export default function DateFilter({
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            自訂
-            {range === "custom" && customStart && customEnd && (
-              <span className="text-xs text-[#8b8fa3] ml-1">
-                {matchedMonth ? `${parseInt(matchedMonth)}月` : `${shortDate(customStart)} ~ ${shortDate(customEnd)}`}
-              </span>
-            )}
+            {isUnified ? getTriggerLabel() : "選擇區間"}
+            <svg className={`w-3 h-3 transition-transform ${showCalendar ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
 
           {showCalendar && (
-            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-xl shadow-2xl z-50 w-[320px] p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-[#8b8fa3]">按月選擇</span>
-                <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 mb-4">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const mm = String(i + 1).padStart(2, "0");
-                  const hasData = availableMonths.includes(mm);
-                  const isActive = matchedMonth === mm;
-                  return (
-                    <button
-                      key={mm}
-                      onClick={() => { if (hasData) selectMonth(mm); }}
-                      disabled={!hasData}
-                      className={`text-sm py-2 rounded-lg transition-all ${
-                        isActive
-                          ? "bg-sky-500/20 text-sky-300 border border-sky-400/50 font-semibold"
-                          : hasData
-                          ? "text-[#c0c3d1] hover:bg-[#232740] border border-transparent"
-                          : "text-[#3a3e55] cursor-not-allowed border border-transparent"
-                      }`}
-                    >
-                      {MONTH_NAMES[i]}
-                    </button>
-                  );
-                })}
+            <div className="absolute top-full left-0 mt-2 bg-[#1a1d2e] border border-[#2a2e45] rounded-xl shadow-2xl z-50 flex w-[460px] overflow-hidden">
+              {/* Left sidebar - quick presets */}
+              <div className="w-[110px] bg-[#0f1117] border-r border-[#2a2e45] p-2 space-y-0.5">
+                {presets.map((p) => (
+                  <button
+                    key={p.key}
+                    onClick={() => { onRangeChange(p.key); setShowCalendar(false); }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                      range === p.key
+                        ? "bg-sky-500/20 text-sky-300 font-medium"
+                        : "text-[#c0c3d1] hover:bg-[#1a1d2e]"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
 
-              <div className="border-t border-[#2a2e45] pt-3 space-y-2">
-                <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={customStart}
-                    min={minDate}
-                    max={maxDate}
-                    onChange={(e) => onCustomDateChange(e.target.value, customEnd)}
-                    className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
-                  />
-                  <span className="text-[#6b7084] text-xs">~</span>
-                  <input
-                    type="date"
-                    value={customEnd}
-                    min={minDate}
-                    max={maxDate}
-                    onChange={(e) => onCustomDateChange(customStart, e.target.value)}
-                    className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
-                  />
+              {/* Right - month grid + custom dates */}
+              <div className="flex-1 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-[#8b8fa3]">按月選擇</span>
+                  <span className="text-sm text-[#c0c3d1] font-medium">2026</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 mb-4">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const mm = String(i + 1).padStart(2, "0");
+                    const hasData = availableMonths.includes(mm);
+                    const isActive = matchedMonth === mm;
+                    return (
+                      <button
+                        key={mm}
+                        onClick={() => { if (hasData) selectMonth(mm); }}
+                        disabled={!hasData}
+                        className={`text-sm py-2 rounded-lg transition-all ${
+                          isActive
+                            ? "bg-sky-500/20 text-sky-300 border border-sky-400/50 font-semibold"
+                            : hasData
+                            ? "text-[#c0c3d1] hover:bg-[#232740] border border-transparent"
+                            : "text-[#3a3e55] cursor-not-allowed border border-transparent"
+                        }`}
+                      >
+                        {MONTH_NAMES[i]}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="border-t border-[#2a2e45] pt-3 space-y-2">
+                  <div className="text-xs text-[#8b8fa3]">或自訂區間</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={customStart}
+                      min={minDate}
+                      max={maxDate}
+                      onChange={(e) => onCustomDateChange(e.target.value, customEnd)}
+                      className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                    />
+                    <span className="text-[#6b7084] text-xs">~</span>
+                    <input
+                      type="date"
+                      value={customEnd}
+                      min={minDate}
+                      max={maxDate}
+                      onChange={(e) => onCustomDateChange(customStart, e.target.value)}
+                      className="flex-1 bg-[#0f1117] border border-[#2a2e45] rounded-lg px-2 py-1.5 text-xs text-[#e4e6f0] focus:border-sky-400/50 focus:outline-none [color-scheme:dark]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,4 +250,12 @@ function shortDate(iso: string): string {
   const m = iso.match(/^\d{4}-(\d{2})-(\d{2})$/);
   if (!m) return iso;
   return `${parseInt(m[1])}/${parseInt(m[2])}`;
+}
+
+function formatRange(maxDate: string, days: number): string {
+  if (!maxDate) return "";
+  const end = new Date(maxDate);
+  const start = new Date(maxDate);
+  start.setDate(end.getDate() - (days - 1));
+  return `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
 }
