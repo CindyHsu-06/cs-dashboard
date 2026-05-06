@@ -92,11 +92,11 @@ export default function CategoryBreakdown({ data }: Props) {
               const total = catTotals[cat.key];
               const pct = grandTotal > 0 ? ((total / grandTotal) * 100).toFixed(0) : "0";
               return (
-                <div key={cat.key} className="bg-[#0f1117] rounded-lg p-3 border border-[#2a2e45] group relative overflow-hidden">
-                  <div className="text-sm font-medium text-[#c0c3d1] mb-2">{cat.label}</div>
-                  <div className="text-2xl font-bold text-[#e4e6f0]">{total > 0 ? total : "—"}</div>
+                <div key={cat.key} className="bg-[#0f1117] rounded-lg px-4 py-3 border border-[#2a2e45] group relative overflow-hidden">
+                  <div className="text-xs font-medium text-[#c0c3d1] mb-1">{cat.label}</div>
+                  <div className="text-xl font-bold text-[#e4e6f0]">{total > 0 ? total : "—"}</div>
                   {total > 0 && (
-                    <div className="text-xs text-[#6b7084] mt-1">{pct}%</div>
+                    <div className="text-xs text-[#6b7084] mt-0.5">{pct}%</div>
                   )}
                   <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${cat.bar} rounded-b-lg`} />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#232740] border border-[#2a2e45] rounded-lg text-xs text-[#8b8fa3] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
