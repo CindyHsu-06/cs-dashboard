@@ -125,32 +125,52 @@ function parseShopeeCSV(rows: string[][]): ShopeeMonthData[] {
 }
 
 function parseCategoryCSV(rows: string[][]): CategoryData[] {
-  // Row 0 = header, rows 1+ = data
-  // Columns: 月份, 平台, 售前諮詢, 訂單/金流, 物流配送, 商品問題, 售後服務, 客訴/其他
+  // Row 0 = header. Detect column positions by header name to handle
+  // optional 品牌 column or reordering.
   if (rows.length < 2) return [];
+
+  const header = rows[0].map((c) => (c || "").trim());
+  const findCol = (name: string, fallback: number) => {
+    const i = header.findIndex((h) => h === name);
+    return i >= 0 ? i : fallback;
+  };
+
+  const cMonth = findCol("月份", 0);
+  const cPlatform = findCol("平台", 1);
+  const cPreSale = findCol("售前諮詢", 2);
+  const cOrder = findCol("訂單/金流", 3);
+  const cLogistics = findCol("物流配送", 4);
+  const cProduct = findCol("商品問題", 5);
+  const cAfterSale = findCol("售後服務", 6);
+  const cComplaint = findCol("客訴/其他", 7);
+
+  const parseNullable = (val: string): number | null => {
+    const trimmed = (val || "").trim();
+    if (trimmed === "") return null;
+    return normalizeNumber(trimmed);
+  };
+
   const result: CategoryData[] = [];
+  let lastMonth = "";
+
   for (let i = 1; i < rows.length; i++) {
     const c = rows[i];
-    const month = (c[0] || "").trim();
-    const platform = (c[1] || "").trim();
-    if (!month || !platform) continue;
+    const rawMonth = (c[cMonth] || "").trim();
+    const month = rawMonth || lastMonth;
+    if (rawMonth) lastMonth = rawMonth;
 
-    const parseNullable = (val: string): number | null => {
-      const trimmed = (val || "").trim();
-      if (trimmed === "") return null;
-      const n = normalizeNumber(trimmed);
-      return n;
-    };
+    const platform = (c[cPlatform] || "").trim();
+    if (!month || !platform) continue;
 
     result.push({
       month,
       platform,
-      preSale: parseNullable(c[2]),
-      orderPayment: parseNullable(c[3]),
-      logistics: parseNullable(c[4]),
-      productIssue: parseNullable(c[5]),
-      afterSale: parseNullable(c[6]),
-      complaint: parseNullable(c[7]),
+      preSale: parseNullable(c[cPreSale]),
+      orderPayment: parseNullable(c[cOrder]),
+      logistics: parseNullable(c[cLogistics]),
+      productIssue: parseNullable(c[cProduct]),
+      afterSale: parseNullable(c[cAfterSale]),
+      complaint: parseNullable(c[cComplaint]),
     });
   }
   return result;
