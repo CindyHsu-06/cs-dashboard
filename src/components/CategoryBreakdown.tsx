@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CategoryData } from "@/lib/fetchData";
+import MonthPicker from "./MonthPicker";
 
 interface Props {
   data: CategoryData[];
@@ -68,29 +69,13 @@ export default function CategoryBreakdown({ data }: Props) {
             依客服對話內容分類（尚未下單 → 訂單中 → 配送中 → 收到貨 → 售後 → 特殊）
           </p>
         </div>
-        {/* Month selector */}
+        {/* Month picker */}
         {allMonths.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {allMonths.map((m) => {
-              const hasContent = monthHasData(m);
-              return (
-                <button
-                  key={m}
-                  onClick={() => setSelectedMonth(m)}
-                  className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                    selectedMonth === m
-                      ? "bg-[#2a3a5c] text-sky-300 border-sky-400/40"
-                      : hasContent
-                      ? "bg-[#0f1117] text-[#8b8fa3] border-[#2a2e45] hover:bg-[#232740]"
-                      : "bg-[#0f1117] text-[#3a3e55] border-[#2a2e45] opacity-50"
-                  }`}
-                >
-                  {m}
-                  {!hasContent && <span className="ml-1 text-[10px]">(空)</span>}
-                </button>
-              );
-            })}
-          </div>
+          <MonthPicker
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            availableMonths={validMonths}
+          />
         )}
       </div>
 

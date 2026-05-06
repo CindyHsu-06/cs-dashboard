@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShopeeMonthData } from "@/lib/fetchData";
+import MonthPicker from "./MonthPicker";
 
 interface Props {
   data: ShopeeMonthData[];
@@ -106,27 +107,11 @@ export default function ShopeeMetrics({ data }: Props) {
           <h3 className="text-lg font-semibold text-[#e4e6f0]">蝦皮聊聊數據</h3>
           <p className="text-xs text-[#6b7084] mt-1">資料來源：蝦皮賣家中心匯出（各賣場加總）</p>
         </div>
-        <div className="flex gap-2">
-          {allMonths.map((m) => {
-            const monthHasData = validMonths.some((v) => v.month === m);
-            return (
-              <button
-                key={m}
-                onClick={() => setSelectedMonth(m)}
-                className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                  selectedMonth === m
-                    ? "bg-[#2a3a5c] text-sky-300 border-sky-400/40"
-                    : monthHasData
-                    ? "bg-[#0f1117] text-[#8b8fa3] border-[#2a2e45] hover:bg-[#232740]"
-                    : "bg-[#0f1117] text-[#3a3e55] border-[#2a2e45] opacity-50"
-                }`}
-              >
-                {m}
-                {!monthHasData && <span className="ml-1 text-[10px]">(空)</span>}
-              </button>
-            );
-          })}
-        </div>
+        <MonthPicker
+          value={selectedMonth}
+          onChange={setSelectedMonth}
+          availableMonths={validMonths.map((v) => v.month)}
+        />
       </div>
 
       {!hasData ? (
